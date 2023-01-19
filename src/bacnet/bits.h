@@ -28,24 +28,24 @@
 * Bit Masks
 *********************************************************************/
 #ifndef BIT
-#define BIT(x)  (1<<(x))
+#define BIT(x)  (1UL<<(x))
 #endif
 #ifndef _BV
-#define _BV(x)  (1<<(x))
+#define _BV(x)  (BIT(x))
 #endif
 
 /* a=register, b=bit number to act upon 0-n */
 #ifndef BIT_SET
-#define BIT_SET(a,b) ((a) |= (1<<(b)))
+#define BIT_SET(a,b) ((a) |= (BIT(b)))
 #endif
 #ifndef BIT_CLEAR
-#define BIT_CLEAR(a,b) ((a) &= ~(1<<(b)))
+#define BIT_CLEAR(a,b) ((a) &= ~(BIT(b)))
 #endif
 #ifndef BIT_FLIP
-#define BIT_FLIP(a,b) ((a) ^= (1<<(b)))
+#define BIT_FLIP(a,b) ((a) ^= (BIT(b)))
 #endif
 #ifndef BIT_CHECK
-#define BIT_CHECK(a,b) ((a) & (1<<(b)))
+#define BIT_CHECK(a,b) (((a) & (BIT(b))) != 0UL)
 #endif
 
 /* x=target variable, y=mask */
