@@ -46,9 +46,11 @@ int encode_unsigned16(uint8_t *apdu, uint16_t value)
     if (apdu) {
         apdu[0] = (uint8_t)((value & 0xff00) >> 8);
         apdu[1] = (uint8_t)(value & 0x00ff);
+
+        return 2;
     }
 
-    return 2;
+    return 0;
 }
 
 int decode_unsigned16(uint8_t *apdu, uint16_t *value)
@@ -56,9 +58,11 @@ int decode_unsigned16(uint8_t *apdu, uint16_t *value)
     if (apdu && value) {
         *value = (uint16_t)((((uint16_t)apdu[0]) << 8) & 0xff00);
         *value |= ((uint16_t)(((uint16_t)apdu[1]) & 0x00ff));
+        return 2;
     }
 
-    return 2;
+    return 0;
+
 }
 
 int encode_unsigned24(uint8_t *apdu, uint32_t value)
