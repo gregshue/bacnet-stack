@@ -1,31 +1,19 @@
-/**************************************************************************
-*
-* Copyright (C) 2004 Steve Karg <skarg@users.sourceforge.net>
-*
-* Permission is hereby granted, free of charge, to any person obtaining
-* a copy of this software and associated documentation files (the
-* "Software"), to deal in the Software without restriction, including
-* without limitation the rights to use, copy, modify, merge, publish,
-* distribute, sublicense, and/or sell copies of the Software, and to
-* permit persons to whom the Software is furnished to do so, subject to
-* the following conditions:
-*
-* The above copyright notice and this permission notice shall be included
-* in all copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*
-*********************************************************************/
-#ifndef CONFIG_H
-#define CONFIG_H
+/**
+ * @file
+ * @brief Default configuration for BACnet Stack library
+ * @author Steve Karg <skarg@users.sourceforge.net>
+ * @date 2004
+ * @copyright SPDX-License-Identifier: MIT
+ */
+#ifndef BACNET_CONFIG_H_
+#define BACNET_CONFIG_H_
 
-/* Include BACnet Specific conf */
+/**
+ * @note configurations are default to values used in the example apps build.
+ * Use a local copy named "bacnet-config.h" with settings configured for
+ * the product specific needs for code space reductions in your device.
+ * Alternately, use a compiler and linker to override these defines.
+ */
 #if defined(BACNET_CONFIG_H)
 #include "bacnet-config.h"
 #endif
@@ -106,6 +94,7 @@
 #if defined(BACNET_SECURITY)
 #define MAX_APDU 412
 #else
+/* note: MS/TP extended frames can be up to 1476 bytes */
 #define MAX_APDU 1476
 #endif
 #else
@@ -169,6 +158,11 @@
     defined(BACAPP_DEVICE_OBJECT_REFERENCE) || \
     defined(BACAPP_OBJECT_PROPERTY_REFERENCE) || \
     defined(BACAPP_DESTINATION) || \
+    defined(BACAPP_BDT_ENTRY) || \
+    defined(BACAPP_FDT_ENTRY) || \
+    defined(BACAPP_ACTION_COMMAND) || \
+    defined(BACAPP_SCALE) || \
+    defined(BACAPP_SHED_LEVEL) || \
     defined(BACAPP_TYPES_EXTRA))
 #define BACAPP_ALL
 #endif
@@ -193,7 +187,7 @@
 #define BACAPP_OBJECT_ID
 #endif
 
-#if defined (BACAPP_TYPES_EXTRA) 
+#if defined (BACAPP_TYPES_EXTRA)
 #define BACAPP_DOUBLE
 #define BACAPP_TIMESTAMP
 #define BACAPP_DATETIME
@@ -209,6 +203,11 @@
 #define BACAPP_DEVICE_OBJECT_REFERENCE
 #define BACAPP_OBJECT_PROPERTY_REFERENCE
 #define BACAPP_DESTINATION
+#define BACAPP_BDT_ENTRY
+#define BACAPP_FDT_ENTRY
+#define BACAPP_ACTION_COMMAND
+#define BACAPP_SCALE
+#define BACAPP_SHED_LEVEL
 #endif
 
 #if defined(BACAPP_DOUBLE) || \
@@ -224,7 +223,12 @@
     defined(BACAPP_DEVICE_OBJECT_PROPERTY_REFERENCE) || \
     defined(BACAPP_DEVICE_OBJECT_REFERENCE) || \
     defined(BACAPP_OBJECT_PROPERTY_REFERENCE) || \
-    defined(BACAPP_DESTINATION)
+    defined(BACAPP_DESTINATION) || \
+    defined(BACAPP_BDT_ENTRY) || \
+    defined(BACAPP_FDT_ENTRY) || \
+    defined(BACAPP_ACTION_COMMAND) || \
+    defined(BACAPP_SCALE) || \
+    defined(BACAPP_SHED_LEVEL)
 #define BACAPP_COMPLEX_TYPES
 #endif
 
@@ -243,33 +247,32 @@
 #define MAX_OCTET_STRING_BYTES (MAX_APDU-6)
 #endif
 
-/*
-** Control the selection of services etc to enable code size reduction for those
-** compiler suites which do not handle removing of unused functions in modules
-** so well.
-**
-** We will start with the A type services code first as these are least likely
-** to be required in embedded systems using the stack.
-*/
+/**
+ * @note Control the selection of services etc to enable code size reduction
+ * for those compiler suites which do not handle removing of unused functions
+ * in modules so well.
+ *
+ * We will start with the A type services code first as these are least likely
+ * to be required in embedded systems using the stack.
+ */
+#ifndef BACNET_SVC_SERVER
+    /* default to client-server device for the example apps to build. */
+    #define BACNET_SVC_SERVER      0
+#endif
 
-/*
-** Note: these are enabled by default for the example apps to build. 
-** Use a local copy named "bacnet-config.h" with settings configured for 
-** the product specific needs for code space reductions in your device.
-** Alternately, use a compiler and linker the have code reduction features.
-**/
-
-#define BACNET_SVC_I_HAVE_A    1
-#define BACNET_SVC_WP_A        1
-#define BACNET_SVC_RP_A        1
-#define BACNET_SVC_RPM_A       1
-#define BACNET_SVC_DCC_A       1
-#define BACNET_SVC_RD_A        1
-#define BACNET_SVC_TS_A        1
-#define BACNET_SVC_SERVER      0
-#define BACNET_USE_OCTETSTRING 1
-#define BACNET_USE_DOUBLE      1
-#define BACNET_USE_SIGNED      1
+#if (BACNET_SVC_SERVER == 0)
+    /* client-server device */
+    #define BACNET_SVC_I_HAVE_A    1
+    #define BACNET_SVC_WP_A        1
+    #define BACNET_SVC_RP_A        1
+    #define BACNET_SVC_RPM_A       1
+    #define BACNET_SVC_DCC_A       1
+    #define BACNET_SVC_RD_A        1
+    #define BACNET_SVC_TS_A        1
+    #define BACNET_USE_OCTETSTRING 1
+    #define BACNET_USE_DOUBLE      1
+    #define BACNET_USE_SIGNED      1
+#endif
 
 /* Do them one by one */
 #ifndef BACNET_SVC_I_HAVE_A     /* Do we send I_Have requests? */
@@ -294,10 +297,6 @@
 
 #ifndef BACNET_SVC_RD_A /* Do we send ReinitialiseDevice requests? */
 #define BACNET_SVC_RD_A 0
-#endif
-
-#ifndef BACNET_SVC_SERVER       /* Are we a pure server type device? */
-#define BACNET_SVC_SERVER 1
 #endif
 
 #ifndef BACNET_USE_OCTETSTRING  /* Do we need any octet strings? */

@@ -30,6 +30,7 @@ if(BOARD STREQUAL unit_testing)
 
   get_filename_component(BACNET_SRC ${BACNET_SRC_PATH} PATH)
   list(APPEND SOURCES
+    ${BACNET_SRC}/bacaction.c
     ${BACNET_SRC}/bacaddr.c
     ${BACNET_SRC}/bacapp.c
     ${BACNET_SRC}/bacdcode.c
@@ -68,3 +69,8 @@ else()
     ${BACNET_TEST_PATH}/src/main.c
     )
 endif()
+
+add_compile_definitions(
+  CONFIG_ZTEST_NEW_API
+  BACNET_STACK_DEPRECATED_DISABLE
+  )

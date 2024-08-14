@@ -3,20 +3,16 @@
  * @brief API for BACnetDestination complex data type encode and decode
  * @author Steve Karg <skarg@users.sourceforge.net>
  * @date May 2022
- * @section LICENSE
- *
- * Copyright (C) 2022 Steve Karg <skarg@users.sourceforge.net>
- *
- * SPDX-License-Identifier: MIT
+ * @copyright SPDX-License-Identifier: MIT
  */
 #ifndef BACNET_DESTINATION_H
 #define BACNET_DESTINATION_H
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "bacnet/bacdef.h"  /* Must be before all other bacnet *.h files */
-#include "bacnet/bacnet_stack_exports.h"
-#include "bacnet/bacenum.h"
+/* BACnet Stack defines - first */
+#include "bacnet/bacdef.h"
+/* BACnet Stack API */
 #include "bacnet/bacstr.h"
 #include "bacnet/datetime.h"
 

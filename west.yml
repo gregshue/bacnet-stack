@@ -38,10 +38,14 @@ manifest:
   projects:
     - name: zephyr
       path: zephyr
-      revision: v3.4.0
+      revision: v3.6.0
       remote: zephyrproject-rtos
       west-commands: scripts/west-commands.yml
       import:
         name-allowlist:
         - cmsis
         - picolibc
+        - hal_stm32
+        - hal_microchip
+        - segger
+        - mcuboot

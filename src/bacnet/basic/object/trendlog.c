@@ -1,46 +1,28 @@
-/**************************************************************************
- *
- * Copyright (C) 2009 Peter Mc Shane
- *
- * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the
- * "Software"), to deal in the Software without restriction, including
- * without limitation the rights to use, copy, modify, merge, publish,
- * distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so, subject to
- * the following conditions:
- *
- * The above copyright notice and this permission notice shall be included
- * in all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
- * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
- * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
- * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
- * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- *********************************************************************/
-
+/**
+ * @file
+ * @author Peter Mc Shane <petermcs@users.sourceforge.net>
+ * @date 2009
+ * @brief A basic Trend Log object implementation.
+ * @copyright SPDX-License-Identifier: MIT
+ */
 #include <stdbool.h>
 #include <stdint.h>
-#include <string.h> /* for memmove */
+#include <string.h>
+/* BACnet Stack defines - first */
 #include "bacnet/bacdef.h"
+/* BACnet Stack API */
 #include "bacnet/bacdcode.h"
-#include "bacnet/bacenum.h"
 #include "bacnet/bacapp.h"
-#include "bacnet/config.h" /* the custom stuff */
+#include "bacnet/bacdevobjpropref.h"
 #include "bacnet/apdu.h"
+#include "bacnet/datetime.h"
 #include "bacnet/wp.h" /* write property handling */
 #include "bacnet/version.h"
 #include "bacnet/basic/object/device.h" /* me */
 #include "bacnet/basic/services.h"
-#include "bacnet/datalink/datalink.h"
 #include "bacnet/basic/binding/address.h"
-#include "bacnet/bacdevobjpropref.h"
 #include "bacnet/basic/object/trendlog.h"
-#include "bacnet/datetime.h"
+#include "bacnet/datalink/datalink.h"
 #if defined(BACFILE)
 #include "bacnet/basic/object/bacfile.h" /* object list dependency */
 #endif
@@ -248,12 +230,13 @@ void Trend_Log_Init(void)
 bool Trend_Log_Object_Name(
     uint32_t object_instance, BACNET_CHARACTER_STRING *object_name)
 {
-    static char text_string[32] = ""; /* okay for single thread */
+    static char text[32] = ""; /* okay for single thread */
     bool status = false;
 
     if (object_instance < MAX_TREND_LOGS) {
-        sprintf(text_string, "Trend Log %u", object_instance);
-        status = characterstring_init_ansi(object_name, text_string);
+        snprintf(text, sizeof(text), "Trend Log %lu", 
+            (unsigned long)object_instance);
+        status = characterstring_init_ansi(object_name, text);
     }
 
     return status;

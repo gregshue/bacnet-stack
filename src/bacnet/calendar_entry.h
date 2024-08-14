@@ -4,17 +4,16 @@
  * @author Ondřej Hruška <ondra@ondrovo.com>
  * @author Steve Karg <skarg@users.sourceforge.net>
  * @date August 2023
- * @section LICENSE
- *
- * SPDX-License-Identifier: MIT
+ * @copyright SPDX-License-Identifier: MIT
  */
 #ifndef BACNET_CALENDAR_ENTRY_H
 #define BACNET_CALENDAR_ENTRY_H
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "bacnet/bacdef.h"  /* Must be before all other bacnet *.h files */
-#include "bacnet/bacnet_stack_exports.h"
+/* BACnet Stack defines - first */
+#include "bacnet/bacdef.h"
+/* BACnet Stack API */
 #include "bacnet/bactimevalue.h"
 #include "bacnet/datetime.h"
 

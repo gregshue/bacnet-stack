@@ -1,54 +1,30 @@
-/*####COPYRIGHTBEGIN####
- -------------------------------------------
- Copyright (C) 2008 Steve Karg
-
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- as published by the Free Software Foundation; either version 2
- of the License, or (at your option) any later version.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with this program; if not, write to:
- The Free Software Foundation, Inc.
- 59 Temple Place - Suite 330
- Boston, MA  02111-1307
- USA.
-
- As a special exception, if other files instantiate templates or
- use macros or inline functions from this file, or you compile
- this file and link it with other works to produce a work based
- on this file, this file does not by itself cause the resulting
- work to be covered by the GNU General Public License. However
- the source code for this file must still be made available in
- accordance with section (3) of the GNU General Public License.
-
- This exception does not invalidate any other reasons why a work
- based on this file might be covered by the GNU General Public
- License.
- -------------------------------------------
-####COPYRIGHTEND####*/
+/**************************************************************************
+ *
+ * Copyright (C) 2008 Steve Karg
+ *
+ * SPDX-License-Identifier: GPL-2.0-or-later WITH GCC-exception-2.0
+ *
+ *********************************************************************/
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-/* OS specific include*/
-#include "bacport.h"
+#/* BACnet Stack defines - first */
+#include "bacnet/bacdef.h"
+/* BACnet Stack API */
 #include "bacnet/basic/sys/mstimer.h"
-/* local includes */
-#include "bacnet/bytes.h"
-#include "rs485.h"
+#include "bacnet/basic/sys/bytes.h"
 #include "bacnet/datalink/crc.h"
 #include "bacnet/datalink/mstp.h"
 #include "bacnet/datalink/dlmstp.h"
 #include "bacnet/datalink/mstptext.h"
 #include "bacnet/bacint.h"
+/* OS specific include*/
+#include "bacport.h"
+/* local includes */
+#include "rs485.h"
 
 /** @file linux/mstpsnap.c  Example application testing BACnet MS/TP on Linux.
  */

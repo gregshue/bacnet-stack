@@ -1,15 +1,16 @@
 /**
  * @file
+ * @brief This file contains the function prototypes for the days calculations
  * @author Steve Karg <skarg@users.sourceforge.net>
  * @date 1997
- * @brief This file contains the function prototypes for the days calculations
+ * @copyright SPDX-License-Identifier: CC-PDDC
  */
 #ifndef DAYS_H
 #define DAYS_H
 #include <stdint.h>
 #include <stdbool.h>
-#include "bacnet/bacdef.h"  /* Must be before all other bacnet *.h files */
-#include "bacnet/bacnet_stack_exports.h"
+/* BACnet Stack defines - first */
+#include "bacnet/bacdef.h"
 
 #ifdef __cplusplus
 extern "C" {

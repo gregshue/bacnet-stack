@@ -3,20 +3,17 @@
  * @author Mikhail Antropov <michail.antropov@dsr-corporation.com>
  * @date June 2022
  * @brief API for a Calendar object used by a BACnet device object
- * @section LICENSE
- *
- * SPDX-License-Identifier: MIT
+ * @copyright SPDX-License-Identifier: MIT
  */
-#ifndef BACNET_CALENDAR_OBJECT_H
-#define BACNET_CALENDAR_OBJECT_H
+#ifndef BACNET_BASIC_OBJECT_CALENDAR_H
+#define BACNET_BASIC_OBJECT_CALENDAR_H
 
 #include <stdbool.h>
 #include <stdint.h>
-#include "bacnet/bacdef.h"  /* Must be before all other bacnet *.h files */
-#include "bacnet/bacnet_stack_exports.h"
-#include "bacnet/config.h"
+/* BACnet Stack defines - first */
+#include "bacnet/bacdef.h"
+/* BACnet Stack API */
 #include "bacnet/calendar_entry.h"
-#include "bacnet/bacenum.h"
 #include "bacnet/bacerror.h"
 #include "bacnet/rp.h"
 #include "bacnet/wp.h"

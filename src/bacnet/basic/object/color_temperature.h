@@ -1,29 +1,17 @@
 /**
  * @file
- * @author Steve Karg
+ * @author Steve Karg <skarg@users.sourceforge.net>
  * @date July 2022
- * @brief Color Temperature object, customize for your use
- *
- * @section DESCRIPTION
- *
- * The Color Temperature object is an object with a present-value that
- * uses an Color Temperature INTEGER type
- *
- * @section LICENSE
- *
- * Copyright (C) 2022 Steve Karg <skarg@users.sourceforge.net>
- *
- * SPDX-License-Identifier: MIT
+ * @brief API for a basic Color Temperature object
+ * @copyright SPDX-License-Identifier: MIT
  */
-#ifndef BACNET_COLOR_TEMPERATURE_H
-#define BACNET_COLOR_TEMPERATURE_H
-
+#ifndef BACNET_BASIC_OBJECT_COLOR_TEMPERATURE_H
+#define BACNET_BASIC_OBJECT_COLOR_TEMPERATURE_H
 #include <stdbool.h>
 #include <stdint.h>
-#include "bacnet/bacdef.h"  /* Must be before all other bacnet *.h files */
-#include "bacnet/bacnet_stack_exports.h"
-#include "bacnet/config.h"
-#include "bacnet/bacenum.h"
+/* BACnet Stack defines - first */
+#include "bacnet/bacdef.h"
+/* BACnet Stack API */
 #include "bacnet/bacerror.h"
 #include "bacnet/rp.h"
 #include "bacnet/wp.h"

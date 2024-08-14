@@ -1,29 +1,17 @@
 /**
  * @file
- * @author Steve Karg
+ * @author Steve Karg <skarg@users.sourceforge.net>
  * @date March 2024
- * @brief Example API for Life Safety Zone Object
- *
- * The Life Safety Zone object type defines a standardized object
- * whose properties represent the externally visible characteristics
- * associated with an arbitrary group of BACnet Life Safety Point
- * and Life Safety Zone objects in fire, life safety and security
- * applications. The condition of a Life Safety Zone object is
- * represented by a mode and a state.
- *
- * @copyright
- *
- * Copyright (C) 2024 Steve Karg <skarg@users.sourceforge.net>
- *
- * SPDX-License-Identifier: MIT
+ * @brief API for a basic BACnet Life Safety Zone object type implementation.
+ * @copyright SPDX-License-Identifier: MIT
  */
-#ifndef BACNET_LIFE_SAFETY_ZONE_H
-#define BACNET_LIFE_SAFETY_ZONE_H
-
+#ifndef BACNET_BASIC_OBJECT_LIFE_SAFETY_ZONE_H
+#define BACNET_BASIC_OBJECT_LIFE_SAFETY_ZONE_H
 #include <stdbool.h>
 #include <stdint.h>
-#include "bacnet/bacdef.h"  /* Must be before all other bacnet *.h files */
-#include "bacnet/bacnet_stack_exports.h"
+/* BACnet Stack defines - first */
+#include "bacnet/bacdef.h"
+/* BACnet Stack API */
 #include "bacnet/bacerror.h"
 #include "bacnet/rp.h"
 #include "bacnet/wp.h"

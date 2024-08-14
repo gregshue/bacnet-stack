@@ -1,28 +1,12 @@
-/*************************************************************************
- * Copyright (C) 2008 Steve Karg <skarg@users.sourceforge.net>
- *
- * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the
- * "Software"), to deal in the Software without restriction, including
- * without limitation the rights to use, copy, modify, merge, publish,
- * distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so, subject to
- * the following conditions:
- *
- * The above copyright notice and this permission notice shall be included
- * in all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
- * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
- * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
- * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
- * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- *********************************************************************/
-
-/* command line tool that sends a BACnet service, and displays the reply */
+/**
+ * @file
+ * @brief command line tool that uses BACnet ReadPropertyMultiple service 
+ * message to read object property values from another device on 
+ * the network and prints the values to the console.
+ * @author Steve Karg <skarg@users.sourceforge.net>
+ * @date 2008
+ * @copyright SPDX-License-Identifier: MIT
+ */
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -32,35 +16,33 @@
 #if (__STDC_VERSION__ >= 199901L) && defined (__STDC_ISO_10646__)
 #include <locale.h>
 #endif
-
 #define PRINT_ENABLED 1
+/* BACnet Stack defines - first */
+#include "bacnet/bacdef.h"
+/* BACnet Stack API */
+#include "bacnet/bactext.h"
+#include "bacnet/bacerror.h"
+#include "bacnet/iam.h"
+#include "bacnet/arf.h"
+#include "bacnet/npdu.h"
+#include "bacnet/apdu.h"
+#include "bacnet/rpm.h"
+#include "bacnet/whois.h"
+#include "bacnet/version.h"
+/* some demo stuff needed */
+#include "bacnet/basic/binding/address.h"
+#include "bacnet/basic/object/device.h"
+#include "bacnet/basic/sys/filename.h"
+#include "bacnet/basic/services.h"
+#include "bacnet/basic/tsm/tsm.h"
+#include "bacnet/datalink/datalink.h"
+#include "bacnet/datalink/dlenv.h"
+#include "bacport.h"
 
 #if BACNET_SVC_SERVER
 #error "App requires server-only features disabled! Set BACNET_SVC_SERVER=0"
 #endif
 
-#include "bacnet/bacdef.h"
-#include "bacnet/config.h"
-#include "bacnet/bactext.h"
-#include "bacnet/bacerror.h"
-#include "bacnet/iam.h"
-#include "bacnet/arf.h"
-#include "bacnet/basic/tsm/tsm.h"
-#include "bacnet/basic/binding/address.h"
-#include "bacnet/npdu.h"
-#include "bacnet/apdu.h"
-#include "bacnet/basic/object/device.h"
-#include "bacport.h"
-#include "bacnet/datalink/datalink.h"
-#include "bacnet/whois.h"
-#include "bacnet/version.h"
-/* some demo stuff needed */
-#include "bacnet/rpm.h"
-#include "bacnet/basic/sys/filename.h"
-#include "bacnet/basic/services.h"
-#include "bacnet/basic/services.h"
-#include "bacnet/basic/tsm/tsm.h"
-#include "bacnet/datalink/dlenv.h"
 
 /* buffer used for receive */
 static uint8_t Rx_Buf[MAX_MPDU] = { 0 };
@@ -408,9 +390,9 @@ int main(int argc, char *argv[])
         } else {
             if (target_args == 0) {
                 Target_Device_Object_Instance = strtol(argv[argi], NULL, 0);
-                if (Target_Device_Object_Instance >= BACNET_MAX_INSTANCE) {
+                if (Target_Device_Object_Instance > BACNET_MAX_INSTANCE) {
                     fprintf(stderr,
-                        "device-instance=%u - it must be less than %u\n",
+                        "device-instance=%u - not greater than %u\n",
                         Target_Device_Object_Instance, BACNET_MAX_INSTANCE);
                     return 1;
                 }
@@ -447,9 +429,9 @@ int main(int argc, char *argv[])
                     rpm_object->object_instance = strtol(argv[argi], NULL, 0);
                     if (rpm_object->object_instance > BACNET_MAX_INSTANCE) {
                         fprintf(stderr,
-                            "object-instance=%u - it must be less than %u\n",
+                            "object-instance=%u - not greater than %u\n",
                             rpm_object->object_instance,
-                            BACNET_MAX_INSTANCE + 1);
+                            BACNET_MAX_INSTANCE);
                         return 1;
                     }
                     tag_value_arg++;
@@ -537,6 +519,7 @@ int main(int argc, char *argv[])
         /* at least one second has passed */
         if (current_seconds != last_seconds) {
             tsm_timer_milliseconds(((current_seconds - last_seconds) * 1000));
+            datalink_maintenance_timer(current_seconds - last_seconds);
         }
         if (Error_Detected) {
             break;
@@ -551,6 +534,10 @@ int main(int argc, char *argv[])
                 Request_Invoke_ID = Send_Read_Property_Multiple_Request(
                     &buffer[0], sizeof(buffer), Target_Device_Object_Instance,
                     Read_Access_Data);
+                if (Request_Invoke_ID == 0) {
+                    fprintf(stderr, "\rError: failed to send request!\n");
+                    break;
+                }
             } else if (tsm_invoke_id_free(Request_Invoke_ID)) {
                 break;
             } else if (tsm_invoke_id_failed(Request_Invoke_ID)) {

@@ -12,10 +12,11 @@
 #include <stdlib.h>
 #include <time.h> /* for time */
 #include <errno.h>
+/* BACnet Stack defines - first */
+#include "bacnet/bacdef.h"
+/* BACnet Stack API */
 #include "bacnet/bactext.h"
 #include "bacnet/iam.h"
-#include "bacnet/config.h"
-#include "bacnet/bacdef.h"
 #include "bacnet/npdu.h"
 #include "bacnet/apdu.h"
 /* some demo stuff needed */
@@ -287,7 +288,7 @@ int main(int argc, char *argv[])
     }
     if (argc > 2) {
         Target_Network_Number_Status = strtol(argv[2], NULL, 0);
-        if (Target_Network_Number > UINT8_MAX) {
+        if (Target_Network_Number_Status > UINT8_MAX) {
             fprintf(stderr, "status=%d - it must be 0 to 255\r\n",
                 Target_Network_Number_Status);
             return 1;

@@ -1,10 +1,9 @@
 /**
  * @file
+ * @brief Discover all BACnet devices on a destination network
  * @author Steve Karg <skarg@users.sourceforge.net>
  * @date 2024
- * @brief Discover all BACnet devices on a destination network
- *
- * SPDX-License-Identifier: MIT
+ * @copyright SPDX-License-Identifier: MIT
  */
 #include <stdint.h>
 #include <stdbool.h>
@@ -12,8 +11,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+/* BACnet Stack defines - first */
 #include "bacnet/bacdef.h"
-#include "bacnet/bacenum.h"
+/* BACnet Stack API */
 #include "bacnet/bactext.h"
 #include "bacnet/bacapp.h"
 #include "bacnet/basic/sys/mstimer.h"
@@ -728,7 +728,7 @@ static void bacnet_read_property_reply(uint32_t device_id,
  * @param device_id - Device ID from discovered device
  * @param device_data - Pointer to the device data structure
  */
-void bacnet_discover_device_fsm(
+static void bacnet_discover_device_fsm(
     uint32_t device_id, BACNET_DEVICE_DATA *device_data)
 {
     KEY key = 0;

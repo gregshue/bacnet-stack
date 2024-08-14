@@ -3,16 +3,15 @@
  * @brief DeleteObject service encode and decode
  * @author Steve Karg <skarg@users.sourceforge.net>
  * @date August 2023
- * @section LICENSE
- *
- * SPDX-License-Identifier: GPL-2.0-or-later WITH GCC-exception-2.0
+ * @copyright SPDX-License-Identifier: GPL-2.0-or-later WITH GCC-exception-2.0
  */
 #include <stdint.h>
 #include <stdbool.h>
-#include "bacnet/bacapp.h"
-#include "bacnet/bacenum.h"
-#include "bacnet/bacdcode.h"
+/* BACnet Stack defines - first */
 #include "bacnet/bacdef.h"
+/* BACnet Stack API */
+#include "bacnet/bacapp.h"
+#include "bacnet/bacdcode.h"
 #include "bacnet/bacerror.h"
 #include "bacnet/delete_object.h"
 

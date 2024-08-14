@@ -1,18 +1,17 @@
 /**
-* @file
-* @author Steve Karg
-* @date 2004
-*
-* Generic ring buffer library for deeply embedded system.
-* See the unit tests for usage examples.
-*/
+ * @file
+ * @brief API for a ring buffer library for deeply embedded system.
+ * @author Steve Karg <skarg@users.sourceforge.net>
+ * @date 2004
+ * @copyright SPDX-License-Identifier: MIT
+ */
 #ifndef RINGBUF_H
 #define RINGBUF_H
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "bacnet/bacdef.h"  /* Must be before all other bacnet *.h files */
-#include "bacnet/bacnet_stack_exports.h"
+/* BACnet Stack defines - first */
+#include "bacnet/bacdef.h"
 
 /**
 * ring buffer power of two alignment macro

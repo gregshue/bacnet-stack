@@ -1,39 +1,19 @@
-/**************************************************************************
- *
- * Copyright (C) 2005,2006,2009 Steve Karg <skarg@users.sourceforge.net>
- *
- * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the
- * "Software"), to deal in the Software without restriction, including
- * without limitation the rights to use, copy, modify, merge, publish,
- * distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so, subject to
- * the following conditions:
- *
- * The above copyright notice and this permission notice shall be included
- * in all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
- * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
- * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
- * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
- * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- *********************************************************************/
-
-/** @file device.c Base "class" for handling all BACnet objects belonging
- *                 to a BACnet device, as well as Device-specific properties. */
-
+/**
+ * @file
+ * @author Steve Karg <skarg@users.sourceforge.net>
+ * @date 2005
+ * @brief Base "class" for handling all BACnet objects belonging
+ * to a BACnet device, as well as Device-specific properties.
+ * @copyright SPDX-License-Identifier: MIT
+ */
 #include <stdbool.h>
 #include <stdint.h>
-#include <string.h> /* for memmove */
+#include <string.h>
+/* BACnet Stack defines - first */
 #include "bacnet/bacdef.h"
+/* BACnet Stack API */
 #include "bacnet/bacdcode.h"
-#include "bacnet/bacenum.h"
 #include "bacnet/bacapp.h"
-#include "bacnet/config.h" /* the custom stuff */
 #include "bacnet/datetime.h"
 #include "bacnet/apdu.h"
 #include "bacnet/wp.h" /* WriteProperty handling */
@@ -51,29 +31,18 @@
 #include "bacnet/basic/object/ao.h"
 #include "bacnet/basic/object/av.h"
 #include "bacnet/basic/object/bi.h"
-#if (BACNET_PROTOCOL_REVISION >= 16)
-#include "bacnet/basic/object/blo.h"
-#endif
 #include "bacnet/basic/object/bo.h"
 #include "bacnet/basic/object/bv.h"
 #include "bacnet/basic/object/calendar.h"
-#include "bacnet/basic/object/channel.h"
 #include "bacnet/basic/object/command.h"
-#include "bacnet/basic/object/csv.h"
-#include "bacnet/basic/object/iv.h"
 #include "bacnet/basic/object/lc.h"
 #include "bacnet/basic/object/lsp.h"
 #include "bacnet/basic/object/lsz.h"
 #include "bacnet/basic/object/ms-input.h"
 #include "bacnet/basic/object/mso.h"
 #include "bacnet/basic/object/msv.h"
-#if (BACNET_PROTOCOL_REVISION >= 17)
-#include "bacnet/basic/object/netport.h"
-#endif
-#include "bacnet/basic/object/osv.h"
-#include "bacnet/basic/object/piv.h"
 #include "bacnet/basic/object/schedule.h"
-#include "bacnet/basic/object/time_value.h"
+#include "bacnet/basic/object/structured_view.h"
 #include "bacnet/basic/object/trendlog.h"
 #if defined(INTRINSIC_REPORTING)
 #include "bacnet/basic/object/nc.h"
@@ -81,14 +50,30 @@
 #if defined(BACFILE)
 #include "bacnet/basic/object/bacfile.h"
 #endif /* defined(BACFILE) */
+#if (BACNET_PROTOCOL_REVISION >= 10)
+#include "bacnet/basic/object/bitstring_value.h"
+#include "bacnet/basic/object/csv.h"
+#include "bacnet/basic/object/iv.h"
+#include "bacnet/basic/object/osv.h"
+#include "bacnet/basic/object/piv.h"
+#include "bacnet/basic/object/time_value.h"
+#endif
+#if (BACNET_PROTOCOL_REVISION >= 14)
+#include "bacnet/basic/object/channel.h"
+#include "bacnet/basic/object/lo.h"
+#endif
+#if (BACNET_PROTOCOL_REVISION >= 16)
+#include "bacnet/basic/object/blo.h"
+#endif
+#if (BACNET_PROTOCOL_REVISION >= 17)
+#include "bacnet/basic/object/netport.h"
+#endif
 #if (BACNET_PROTOCOL_REVISION >= 24)
 #include "bacnet/basic/object/color_object.h"
 #include "bacnet/basic/object/color_temperature.h"
 #endif
 
-/* local forward (semi-private) and external prototypes */
-int Device_Read_Property_Local(BACNET_READ_PROPERTY_DATA *rpdata);
-bool Device_Write_Property_Local(BACNET_WRITE_PROPERTY_DATA *wp_data);
+/* external prototypes */
 extern int Routed_Device_Read_Property_Local(BACNET_READ_PROPERTY_DATA *rpdata);
 extern bool Routed_Device_Write_Property_Local(
     BACNET_WRITE_PROPERTY_DATA *wp_data);
@@ -96,6 +81,7 @@ extern bool Routed_Device_Write_Property_Local(
 /* may be overridden by outside table */
 static object_functions_t *Object_Table;
 
+/* clang-format off */
 static object_functions_t My_Object_Table[] = {
     { OBJECT_DEVICE, NULL /* Init - don't init Device or it will recourse! */,
         Device_Count, Device_Index_To_Instance,
@@ -124,13 +110,14 @@ static object_functions_t My_Object_Table[] = {
         Analog_Input_Encode_Value_List, Analog_Input_Change_Of_Value,
         Analog_Input_Change_Of_Value_Clear, Analog_Input_Intrinsic_Reporting,
         NULL /* Add_List_Element */, NULL /* Remove_List_Element */,
-        NULL /* Create */, NULL /* Delete */, NULL /* Timer */ },
+        Analog_Input_Create, Analog_Input_Delete, NULL /* Timer */ },
     { OBJECT_ANALOG_OUTPUT, Analog_Output_Init, Analog_Output_Count,
         Analog_Output_Index_To_Instance, Analog_Output_Valid_Instance,
         Analog_Output_Object_Name, Analog_Output_Read_Property,
         Analog_Output_Write_Property, Analog_Output_Property_Lists,
-        NULL /* ReadRangeInfo */, NULL /* Iterator */, NULL /* Value_Lists */,
-        NULL /* COV */, NULL /* COV Clear */, NULL /* Intrinsic Reporting */,
+        NULL /* ReadRangeInfo */, NULL /* Iterator */,
+        Analog_Output_Encode_Value_List, Analog_Output_Change_Of_Value,
+        Analog_Output_Change_Of_Value_Clear, NULL /* Intrinsic Reporting */,
         NULL /* Add_List_Element */, NULL /* Remove_List_Element */,
         Analog_Output_Create, Analog_Output_Delete, NULL /* Timer */ },
     { OBJECT_ANALOG_VALUE, Analog_Value_Init, Analog_Value_Count,
@@ -141,7 +128,7 @@ static object_functions_t My_Object_Table[] = {
         Analog_Value_Encode_Value_List, Analog_Value_Change_Of_Value,
         Analog_Value_Change_Of_Value_Clear, Analog_Value_Intrinsic_Reporting,
         NULL /* Add_List_Element */, NULL /* Remove_List_Element */,
-        NULL /* Create */, NULL /* Delete */, NULL /* Timer */ },
+        Analog_Value_Create, Analog_Value_Delete, NULL /* Timer */ },
     { OBJECT_BINARY_INPUT, Binary_Input_Init, Binary_Input_Count,
         Binary_Input_Index_To_Instance, Binary_Input_Valid_Instance,
         Binary_Input_Object_Name, Binary_Input_Read_Property,
@@ -150,23 +137,25 @@ static object_functions_t My_Object_Table[] = {
         Binary_Input_Encode_Value_List, Binary_Input_Change_Of_Value,
         Binary_Input_Change_Of_Value_Clear, NULL /* Intrinsic Reporting */,
         NULL /* Add_List_Element */, NULL /* Remove_List_Element */,
-        NULL /* Create */, NULL /* Delete */, NULL /* Timer */ },
+        Binary_Input_Create, Binary_Input_Delete, NULL /* Timer */ },
     { OBJECT_BINARY_OUTPUT, Binary_Output_Init, Binary_Output_Count,
         Binary_Output_Index_To_Instance, Binary_Output_Valid_Instance,
         Binary_Output_Object_Name, Binary_Output_Read_Property,
         Binary_Output_Write_Property, Binary_Output_Property_Lists,
-        NULL /* ReadRangeInfo */, NULL /* Iterator */, NULL /* Value_Lists */,
-        NULL /* COV */, NULL /* COV Clear */, NULL /* Intrinsic Reporting */,
+        NULL /* ReadRangeInfo */, NULL /* Iterator */,
+        Binary_Output_Encode_Value_List, Binary_Output_Change_Of_Value,
+        Binary_Output_Change_Of_Value_Clear, NULL /* Intrinsic Reporting */,
         NULL /* Add_List_Element */, NULL /* Remove_List_Element */,
         Binary_Output_Create, Binary_Output_Delete, NULL /* Timer */ },
     { OBJECT_BINARY_VALUE, Binary_Value_Init, Binary_Value_Count,
         Binary_Value_Index_To_Instance, Binary_Value_Valid_Instance,
         Binary_Value_Object_Name, Binary_Value_Read_Property,
         Binary_Value_Write_Property, Binary_Value_Property_Lists,
-        NULL /* ReadRangeInfo */, NULL /* Iterator */, NULL /* Value_Lists */,
-        NULL /* COV */, NULL /* COV Clear */, NULL /* Intrinsic Reporting */,
+        NULL /* ReadRangeInfo */, NULL /* Iterator */,
+        Binary_Value_Encode_Value_List, Binary_Value_Change_Of_Value,
+        Binary_Value_Change_Of_Value_Clear, NULL /* Intrinsic Reporting */,
         NULL /* Add_List_Element */, NULL /* Remove_List_Element */,
-        NULL /* Create */, NULL /* Delete */, NULL /* Timer */ },
+        Binary_Value_Create, Binary_Value_Delete, NULL /* Timer */ },
     { OBJECT_CALENDAR, Calendar_Init, Calendar_Count,
         Calendar_Index_To_Instance, Calendar_Valid_Instance,
         Calendar_Object_Name, Calendar_Read_Property,
@@ -174,7 +163,18 @@ static object_functions_t My_Object_Table[] = {
         NULL /* ReadRangeInfo */, NULL /* Iterator */, NULL /* Value_Lists */,
         NULL /* COV */, NULL /* COV Clear */, NULL /* Intrinsic Reporting */,
         NULL /* Add_List_Element */, NULL /* Remove_List_Element */,
-        NULL /* Create */, NULL /* Delete */, NULL /* Timer */ },
+        Calendar_Create, Calendar_Delete, NULL /* Timer */ },
+#if (BACNET_PROTOCOL_REVISION >= 10)
+    { OBJECT_BITSTRING_VALUE, BitString_Value_Init,
+        BitString_Value_Count, BitString_Value_Index_To_Instance,
+        BitString_Value_Valid_Instance, BitString_Value_Object_Name,
+        BitString_Value_Read_Property, BitString_Value_Write_Property,
+        BitString_Value_Property_Lists, NULL /* ReadRangeInfo */,
+        NULL /* Iterator */, BitString_Value_Encode_Value_List,
+        BitString_Value_Change_Of_Value, BitString_Value_Change_Of_Value_Clear,
+        NULL /* Intrinsic Reporting */,  NULL /* Add_List_Element */,
+        NULL /* Remove_List_Element */, NULL /* Create */, NULL /* Delete */,
+        NULL /* Timer */ },
     { OBJECT_CHARACTERSTRING_VALUE, CharacterString_Value_Init,
         CharacterString_Value_Count, CharacterString_Value_Index_To_Instance,
         CharacterString_Value_Valid_Instance, CharacterString_Value_Object_Name,
@@ -187,6 +187,33 @@ static object_functions_t My_Object_Table[] = {
         NULL /* Intrinsic Reporting */, NULL /* Add_List_Element */,
         NULL /* Remove_List_Element */, NULL /* Create */, NULL /* Delete */,
         NULL /* Timer */ },
+    { OBJECT_OCTETSTRING_VALUE, OctetString_Value_Init, OctetString_Value_Count,
+        OctetString_Value_Index_To_Instance, OctetString_Value_Valid_Instance,
+        OctetString_Value_Object_Name, OctetString_Value_Read_Property,
+        OctetString_Value_Write_Property, OctetString_Value_Property_Lists,
+        NULL /* ReadRangeInfo */, NULL /* Iterator */, NULL /* Value_Lists */,
+        NULL /* COV */, NULL /* COV Clear */, NULL /* Intrinsic Reporting */,
+        NULL /* Add_List_Element */, NULL /* Remove_List_Element */,
+        NULL /* Create */, NULL /* Delete */, NULL /* Timer */ },
+    { OBJECT_POSITIVE_INTEGER_VALUE, PositiveInteger_Value_Init,
+        PositiveInteger_Value_Count, PositiveInteger_Value_Index_To_Instance,
+        PositiveInteger_Value_Valid_Instance, PositiveInteger_Value_Object_Name,
+        PositiveInteger_Value_Read_Property,
+        PositiveInteger_Value_Write_Property,
+        PositiveInteger_Value_Property_Lists, NULL /* ReadRangeInfo */,
+        NULL /* Iterator */, NULL /* Value_Lists */, NULL /* COV */,
+        NULL /* COV Clear */, NULL /* Intrinsic Reporting */,
+        NULL /* Add_List_Element */, NULL /* Remove_List_Element */,
+        NULL /* Create */, NULL /* Delete */, NULL /* Timer */ },
+    { OBJECT_TIME_VALUE, Time_Value_Init, Time_Value_Count,
+        Time_Value_Index_To_Instance, Time_Value_Valid_Instance,
+        Time_Value_Object_Name, Time_Value_Read_Property,
+        Time_Value_Write_Property, Time_Value_Property_Lists,
+        NULL /* ReadRangeInfo */, NULL /* Iterator */, NULL /* Value_Lists */,
+        NULL /* COV */, NULL /* COV Clear */, NULL /* Intrinsic Reporting */,
+        NULL /* Add_List_Element */, NULL /* Remove_List_Element */,
+        NULL /* Create */, NULL /* Delete */, NULL /* Timer */ },
+#endif
     { OBJECT_COMMAND, Command_Init, Command_Count, Command_Index_To_Instance,
         Command_Valid_Instance, Command_Object_Name, Command_Read_Property,
         Command_Write_Property, Command_Property_Lists,
@@ -237,22 +264,24 @@ static object_functions_t My_Object_Table[] = {
         NULL /* ReadRangeInfo */, NULL /* Iterator */, NULL /* Value_Lists */,
         NULL /* COV */, NULL /* COV Clear */, NULL /* Intrinsic Reporting */,
         NULL /* Add_List_Element */, NULL /* Remove_List_Element */,
-        NULL /* Create */, NULL /* Delete */, NULL /* Timer */ },
+        Load_Control_Create, Load_Control_Delete, Load_Control_Timer},
     { OBJECT_MULTI_STATE_INPUT, Multistate_Input_Init, Multistate_Input_Count,
         Multistate_Input_Index_To_Instance, Multistate_Input_Valid_Instance,
         Multistate_Input_Object_Name, Multistate_Input_Read_Property,
         Multistate_Input_Write_Property, Multistate_Input_Property_Lists,
-        NULL /* ReadRangeInfo */, NULL /* Iterator */, NULL /* Value_Lists */,
-        NULL /* COV */, NULL /* COV Clear */, NULL /* Intrinsic Reporting */,
+        NULL /* ReadRangeInfo */, NULL /* Iterator */,
+        Multistate_Input_Encode_Value_List, Multistate_Input_Change_Of_Value,
+        Multistate_Input_Change_Of_Value_Clear, NULL /* Intrinsic Reporting */,
         NULL /* Add_List_Element */, NULL /* Remove_List_Element */,
-        NULL /* Create */, NULL /* Delete */, NULL /* Timer */ },
+        Multistate_Input_Create, Multistate_Input_Delete, NULL /* Timer */ },
     { OBJECT_MULTI_STATE_OUTPUT, Multistate_Output_Init,
         Multistate_Output_Count, Multistate_Output_Index_To_Instance,
         Multistate_Output_Valid_Instance, Multistate_Output_Object_Name,
         Multistate_Output_Read_Property, Multistate_Output_Write_Property,
         Multistate_Output_Property_Lists, NULL /* ReadRangeInfo */,
-        NULL /* Iterator */, NULL /* Value_Lists */, NULL /* COV */,
-        NULL /* COV Clear */, NULL /* Intrinsic Reporting */,
+        NULL /* Iterator */,
+        Multistate_Output_Encode_Value_List, Multistate_Output_Change_Of_Value,
+        Multistate_Output_Change_Of_Value_Clear, NULL /* Intrinsic Reporting */,
         NULL /* Add_List_Element */, NULL /* Remove_List_Element */,
         Multistate_Output_Create, Multistate_Output_Delete, NULL /* Timer */ },
     { OBJECT_MULTI_STATE_VALUE, Multistate_Value_Init, Multistate_Value_Count,
@@ -263,7 +292,7 @@ static object_functions_t My_Object_Table[] = {
         Multistate_Value_Encode_Value_List, Multistate_Value_Change_Of_Value,
         Multistate_Value_Change_Of_Value_Clear, NULL /* Intrinsic Reporting */,
         NULL /* Add_List_Element */, NULL /* Remove_List_Element */,
-        NULL /* Create */, NULL /* Delete */, NULL /* Timer */ },
+        Multistate_Value_Create, Multistate_Value_Delete, NULL /* Timer */ },
     { OBJECT_TRENDLOG, Trend_Log_Init, Trend_Log_Count,
         Trend_Log_Index_To_Instance, Trend_Log_Valid_Instance,
         Trend_Log_Object_Name, Trend_Log_Read_Property,
@@ -330,24 +359,6 @@ static object_functions_t My_Object_Table[] = {
         NULL /* Add_List_Element */, NULL /* Remove_List_Element */,
         bacfile_create, bacfile_delete, NULL /* Timer */ },
 #endif
-    { OBJECT_OCTETSTRING_VALUE, OctetString_Value_Init, OctetString_Value_Count,
-        OctetString_Value_Index_To_Instance, OctetString_Value_Valid_Instance,
-        OctetString_Value_Object_Name, OctetString_Value_Read_Property,
-        OctetString_Value_Write_Property, OctetString_Value_Property_Lists,
-        NULL /* ReadRangeInfo */, NULL /* Iterator */, NULL /* Value_Lists */,
-        NULL /* COV */, NULL /* COV Clear */, NULL /* Intrinsic Reporting */,
-        NULL /* Add_List_Element */, NULL /* Remove_List_Element */,
-        NULL /* Create */, NULL /* Delete */, NULL /* Timer */ },
-    { OBJECT_POSITIVE_INTEGER_VALUE, PositiveInteger_Value_Init,
-        PositiveInteger_Value_Count, PositiveInteger_Value_Index_To_Instance,
-        PositiveInteger_Value_Valid_Instance, PositiveInteger_Value_Object_Name,
-        PositiveInteger_Value_Read_Property,
-        PositiveInteger_Value_Write_Property,
-        PositiveInteger_Value_Property_Lists, NULL /* ReadRangeInfo */,
-        NULL /* Iterator */, NULL /* Value_Lists */, NULL /* COV */,
-        NULL /* COV Clear */, NULL /* Intrinsic Reporting */,
-        NULL /* Add_List_Element */, NULL /* Remove_List_Element */,
-        NULL /* Create */, NULL /* Delete */, NULL /* Timer */ },
     { OBJECT_SCHEDULE, Schedule_Init, Schedule_Count,
         Schedule_Index_To_Instance, Schedule_Valid_Instance,
         Schedule_Object_Name, Schedule_Read_Property, Schedule_Write_Property,
@@ -356,14 +367,14 @@ static object_functions_t My_Object_Table[] = {
         NULL /* Intrinsic Reporting */, NULL /* Add_List_Element */,
         NULL /* Remove_List_Element */, NULL /* Create */, NULL /* Delete */,
         NULL /* Timer */ },
-    { OBJECT_TIME_VALUE, Time_Value_Init, Time_Value_Count,
-        Time_Value_Index_To_Instance, Time_Value_Valid_Instance,
-        Time_Value_Object_Name, Time_Value_Read_Property,
-        Time_Value_Write_Property, Time_Value_Property_Lists,
+    { OBJECT_STRUCTURED_VIEW, Structured_View_Init, Structured_View_Count,
+        Structured_View_Index_To_Instance, Structured_View_Valid_Instance,
+        Structured_View_Object_Name, Structured_View_Read_Property,
+        NULL /* Write_Property */, Structured_View_Property_Lists,
         NULL /* ReadRangeInfo */, NULL /* Iterator */, NULL /* Value_Lists */,
-        NULL /* COV */, NULL /* COV Clear */, NULL /* Intrinsic Reporting */,
+        NULL /* COV */, NULL /* COV Clear */,  NULL /* Intrinsic Reporting */,
         NULL /* Add_List_Element */, NULL /* Remove_List_Element */,
-        NULL /* Create */, NULL /* Delete */, NULL /* Timer */ },
+        Structured_View_Create, Structured_View_Delete, NULL /* Timer */ },
     { OBJECT_ACCUMULATOR, Accumulator_Init, Accumulator_Count,
         Accumulator_Index_To_Instance, Accumulator_Valid_Instance,
         Accumulator_Object_Name, Accumulator_Read_Property,
@@ -381,6 +392,7 @@ static object_functions_t My_Object_Table[] = {
         NULL /* Add_List_Element */, NULL /* Remove_List_Element */,
         NULL /* Create */, NULL /* Delete */, NULL /* Timer */ },
 };
+/* clang-format on */
 
 /** Glue function to let the Device object, when called by a handler,
  * lookup which Object type needs to be invoked.
@@ -475,16 +487,19 @@ void Device_Objects_Property_List(BACNET_OBJECT_TYPE object_type,
     return;
 }
 
+/* clang-format off */
 /* These three arrays are used by the ReadPropertyMultiple handler */
-static const int Device_Properties_Required[] = { PROP_OBJECT_IDENTIFIER,
-    PROP_OBJECT_NAME, PROP_OBJECT_TYPE, PROP_SYSTEM_STATUS, PROP_VENDOR_NAME,
-    PROP_VENDOR_IDENTIFIER, PROP_MODEL_NAME, PROP_FIRMWARE_REVISION,
-    PROP_APPLICATION_SOFTWARE_VERSION, PROP_PROTOCOL_VERSION,
-    PROP_PROTOCOL_REVISION, PROP_PROTOCOL_SERVICES_SUPPORTED,
-    PROP_PROTOCOL_OBJECT_TYPES_SUPPORTED, PROP_OBJECT_LIST,
-    PROP_MAX_APDU_LENGTH_ACCEPTED, PROP_SEGMENTATION_SUPPORTED,
-    PROP_APDU_TIMEOUT, PROP_NUMBER_OF_APDU_RETRIES, PROP_DEVICE_ADDRESS_BINDING,
-    PROP_DATABASE_REVISION, -1 };
+static const int Device_Properties_Required[] = {
+    PROP_OBJECT_IDENTIFIER, PROP_OBJECT_NAME, PROP_OBJECT_TYPE,
+    PROP_SYSTEM_STATUS, PROP_VENDOR_NAME, PROP_VENDOR_IDENTIFIER,
+    PROP_MODEL_NAME, PROP_FIRMWARE_REVISION, PROP_APPLICATION_SOFTWARE_VERSION,
+    PROP_PROTOCOL_VERSION, PROP_PROTOCOL_REVISION,
+    PROP_PROTOCOL_SERVICES_SUPPORTED, PROP_PROTOCOL_OBJECT_TYPES_SUPPORTED,
+    PROP_OBJECT_LIST, PROP_MAX_APDU_LENGTH_ACCEPTED,
+    PROP_SEGMENTATION_SUPPORTED, PROP_APDU_TIMEOUT,
+    PROP_NUMBER_OF_APDU_RETRIES, PROP_DEVICE_ADDRESS_BINDING,
+    PROP_DATABASE_REVISION, -1
+};
 
 static const int Device_Properties_Optional[] = {
 #if defined(BACDL_MSTP)
@@ -499,7 +514,10 @@ static const int Device_Properties_Optional[] = {
     -1
 };
 
-static const int Device_Properties_Proprietary[] = { -1 };
+static const int Device_Properties_Proprietary[] = {
+    -1
+};
+/* clang-format on */
 
 void Device_Property_Lists(
     const int **pRequired, const int **pOptional, const int **pProprietary)
@@ -652,6 +670,11 @@ bool Device_Reinitialize(BACNET_REINITIALIZE_DEVICE_DATA *rd_data)
                     rd_data->error_code =
                         ERROR_CODE_OPTIONAL_FUNCTIONALITY_NOT_SUPPORTED;
                 }
+                break;
+            case BACNET_REINIT_ACTIVATE_CHANGES:
+                /* note: activate changes *after* the simple ack is sent */
+                Reinitialize_State = rd_data->state;
+                status = true;
                 break;
             default:
                 rd_data->error_class = ERROR_CLASS_SERVICES;
@@ -2244,16 +2267,6 @@ void Device_Init(object_functions_t *object_table)
         }
         pObject++;
     }
-    /* create some dynamically created objects as examples */
-    if (!object_table) {
-        pObject = Object_Table;
-        while (pObject->Object_Type < MAX_BACNET_OBJECT_TYPE) {
-            if (pObject->Object_Create) {
-                pObject->Object_Create(BACNET_MAX_INSTANCE);
-            }
-            pObject++;
-        }
-    }
 #if (BACNET_PROTOCOL_REVISION >= 14)
     Channel_Write_Property_Internal_Callback_Set(Device_Write_Property);
 #endif
@@ -2275,7 +2288,11 @@ bool DeviceGetRRInfo(BACNET_READ_RANGE_DATA *pRequest, /* Info on the request */
         case PROP_UTC_TIME_SYNCHRONIZATION_RECIPIENTS:
             pInfo->RequestTypes = RR_BY_POSITION;
             pRequest->error_class = ERROR_CLASS_PROPERTY;
-            pRequest->error_code = ERROR_CODE_UNKNOWN_PROPERTY;
+            if (pRequest->array_index == BACNET_ARRAY_ALL) {
+                pRequest->error_code = ERROR_CODE_UNKNOWN_PROPERTY;
+            } else {
+                pRequest->error_code = ERROR_CODE_PROPERTY_IS_NOT_AN_ARRAY;
+            }
             break;
 
         case PROP_DEVICE_ADDRESS_BINDING:
@@ -2287,11 +2304,19 @@ bool DeviceGetRRInfo(BACNET_READ_RANGE_DATA *pRequest, /* Info on the request */
         case PROP_ACTIVE_COV_SUBSCRIPTIONS:
             pInfo->RequestTypes = RR_BY_POSITION;
             pRequest->error_class = ERROR_CLASS_PROPERTY;
-            pRequest->error_code = ERROR_CODE_UNKNOWN_PROPERTY;
+            if (pRequest->array_index == BACNET_ARRAY_ALL) {
+                pRequest->error_code = ERROR_CODE_UNKNOWN_PROPERTY;
+            } else {
+                pRequest->error_code = ERROR_CODE_PROPERTY_IS_NOT_AN_ARRAY;
+            }
             break;
         default:
             pRequest->error_class = ERROR_CLASS_SERVICES;
             pRequest->error_code = ERROR_CODE_PROPERTY_IS_NOT_A_LIST;
+            if (pRequest->array_index == BACNET_ARRAY_ALL) {
+                pRequest->error_code = ERROR_CODE_UNKNOWN_PROPERTY;
+                pRequest->error_class = ERROR_CLASS_PROPERTY;
+            }
             break;
     }
 

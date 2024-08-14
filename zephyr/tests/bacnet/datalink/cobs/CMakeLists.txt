@@ -44,3 +44,8 @@ else()
     ${BACNET_DATALINK_SRC}/cobs.c
     )
 endif()
+
+add_compile_definitions(
+  CONFIG_ZTEST_NEW_API
+  BACNET_STACK_DEPRECATED_DISABLE
+  )

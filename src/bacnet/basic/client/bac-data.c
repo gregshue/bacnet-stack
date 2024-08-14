@@ -3,14 +3,14 @@
  * @author Steve Karg <skarg@users.sourceforge.net>
  * @date 2013
  * @brief Store properties from other BACnet devices
- *
- * SPDX-License-Identifier: MIT
+ * @copyright SPDX-License-Identifier: MIT
  */
 #include <stdint.h>
 #include <stdbool.h>
 #include <assert.h>
+/* BACnet Stack defines - first */
 #include "bacnet/bacdef.h"
-#include "bacnet/bacenum.h"
+/* BACnet Stack API */
 #include "bacnet/basic/sys/mstimer.h"
 /* us */
 #include "bacnet/basic/client/bac-rw.h"

@@ -1,19 +1,18 @@
 /**
  * @file
+ * @brief API to read properties from other BACnet devices
  * @author Steve Karg <skarg@users.sourceforge.net>
- * @date 2013
- *
- * SPDX-License-Identifier: MIT
+ * @date 2022
+ * @copyright SPDX-License-Identifier: MIT
  */
-#ifndef BAC_RW_H
-#define BAC_RW_H
-
+#ifndef BACNET_BASIC_CLIENT_READ_WRITE_H
+#define BACNET_BASIC_CLIENT_READ_WRITE_H
 #include <stdint.h>
-#include "bacnet/bacdef.h"  /* Must be before all other bacnet *.h files */
-#include "bacnet/bacenum.h"
+/* BACnet Stack defines - first */
+#include "bacnet/bacdef.h"
+/* BACnet Stack API */
 #include "bacnet/bacapp.h"
 #include "bacnet/rp.h"
-#include "bacnet/bacnet_stack_exports.h"
 
 /**
  * Save the requested ReadProperty data to a data store

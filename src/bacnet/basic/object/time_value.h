@@ -3,19 +3,16 @@
  * @author Mikhail Antropov <michail.antropov@dsr-corporation.com>
  * @date June 2023
  * @brief API for a Time Value object used by a BACnet device object
- * @section LICENSE
- *
- * SPDX-License-Identifier: MIT
+ * @copyright SPDX-License-Identifier: MIT
  */
-#ifndef BACNET_TIME_VALUE_OBJECT_H
-#define BACNET_TIME_VALUE_OBJECT_H
+#ifndef BACNET_BASIC_TIME_VALUE_OBJECT_H
+#define BACNET_BASIC_TIME_VALUE_OBJECT_H
 
 #include <stdbool.h>
 #include <stdint.h>
-#include "bacnet/bacdef.h"  /* Must be before all other bacnet *.h files */
-#include "bacnet/bacnet_stack_exports.h"
-#include "bacnet/config.h"
-#include "bacnet/bacenum.h"
+/* BACnet Stack defines - first */
+#include "bacnet/bacdef.h"
+/* BACnet Stack API */
 #include "bacnet/bacerror.h"
 #include "bacnet/rp.h"
 #include "bacnet/wp.h"
@@ -75,7 +72,7 @@ BACNET_STACK_EXPORT
 bool Time_Value_Out_Of_Service_Set(uint32_t object_instance, bool oos_flag);
 
 BACNET_STACK_EXPORT
-char *Time_Description(uint32_t object_instance);
+char *Time_Value_Description(uint32_t object_instance);
 BACNET_STACK_EXPORT
 bool Time_Value_Description_Set(uint32_t object_instance, char *new_name);
 
@@ -87,9 +84,21 @@ BACNET_STACK_EXPORT
 void Time_Value_Write_Disable(uint32_t instance);
 
 BACNET_STACK_EXPORT
+bool Time_Value_Encode_Value_List(
+    uint32_t object_instance,
+    BACNET_PROPERTY_VALUE * value_list);
+BACNET_STACK_EXPORT
+bool Time_Value_Change_Of_Value(
+    uint32_t instance);
+BACNET_STACK_EXPORT
+void Time_Value_Change_Of_Value_Clear(
+    uint32_t instance);
+
+BACNET_STACK_EXPORT
 uint32_t Time_Value_Create(uint32_t object_instance);
 BACNET_STACK_EXPORT
 bool Time_Value_Delete(uint32_t object_instance);
+
 BACNET_STACK_EXPORT
 void Time_Value_Cleanup(void);
 BACNET_STACK_EXPORT

@@ -3,21 +3,15 @@
  * @brief API for BACnetLightingCommand and BACnetColorCommand
  * @author Steve Karg <skarg@users.sourceforge.net>
  * @date June 2022
- * @section LICENSE
- *
- * Copyright (C) 2022 Steve Karg <skarg@users.sourceforge.net>
- *
- *
- * SPDX-License-Identifier: MIT
+ * @copyright SPDX-License-Identifier: MIT
  */
-#ifndef LIGHTING_H
-#define LIGHTING_H
+#ifndef BACNET_LIGHTING_H
+#define BACNET_LIGHTING_H
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "bacnet/bacdef.h"  /* Must be before all other bacnet *.h files */
-#include "bacnet/bacnet_stack_exports.h"
-#include "bacnet/bacenum.h"
+/* BACnet Stack defines - first */
+#include "bacnet/bacdef.h"
 
 /* BACnetLightingCommand ::= SEQUENCE {
     operation [0] BACnetLightingOperation,

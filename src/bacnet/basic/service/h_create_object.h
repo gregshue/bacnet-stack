@@ -3,18 +3,15 @@
  * @brief API for CreateObject service handlers
  * @author Steve Karg <skarg@users.sourceforge.net>
  * @date August 2023
- * @section LICENSE
- *
- * SPDX-License-Identifier: MIT
+ * @copyright SPDX-License-Identifier: MIT
  */
-#ifndef HANDLER_CREATE_OBJECT_H
-#define HANDLER_CREATE_OBJECT_H
-
+#ifndef BACNET_BASIC_SERVICE_HANDLER_CREATE_OBJECT_H
+#define BACNET_BASIC_SERVICE_HANDLER_CREATE_OBJECT_H
 #include <stdint.h>
 #include <stdbool.h>
-#include "bacnet/bacdef.h"  /* Must be before all other bacnet *.h files */
-#include "bacnet/bacnet_stack_exports.h"
-#include "bacnet/bacenum.h"
+/* BACnet Stack defines - first */
+#include "bacnet/bacdef.h"
+/* BACnet Stack API */
 #include "bacnet/apdu.h"
 
 #ifdef __cplusplus

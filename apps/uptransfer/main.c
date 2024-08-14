@@ -1,28 +1,11 @@
-/*************************************************************************
- * Copyright (C) 2006 Steve Karg <skarg@users.sourceforge.net>
- *
- * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the
- * "Software"), to deal in the Software without restriction, including
- * without limitation the rights to use, copy, modify, merge, publish,
- * distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so, subject to
- * the following conditions:
- *
- * The above copyright notice and this permission notice shall be included
- * in all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
- * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
- * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
- * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
- * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- *********************************************************************/
-
-/* command line tool that sends a BACnet service, and displays the reply */
+/**
+ * @file
+ * @brief command line tool that sends a BACnet UnconfirmedPrivateTransfer
+ * message to the network
+ * @author Steve Karg <skarg@users.sourceforge.net>
+ * @date 2016
+ * @copyright SPDX-License-Identifier: MIT
+ */
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -30,30 +13,27 @@
 #include <errno.h>
 #include <time.h> /* for time */
 #include <ctype.h> /* for toupper */
-
 #define PRINT_ENABLED 1
-
+/* BACnet Stack defines - first */
 #include "bacnet/bacdef.h"
-#include "bacnet/config.h"
+/* BACnet Stack API */
+#include "bacnet/bacapp.h"
 #include "bacnet/bactext.h"
 #include "bacnet/bacerror.h"
 #include "bacnet/iam.h"
 #include "bacnet/arf.h"
-#include "bacnet/basic/tsm/tsm.h"
-#include "bacnet/basic/binding/address.h"
 #include "bacnet/npdu.h"
 #include "bacnet/apdu.h"
-#include "bacnet/basic/object/device.h"
-#include "bacport.h"
-#include "bacnet/datalink/datalink.h"
 #include "bacnet/whois.h"
 /* some demo stuff needed */
+#include "bacnet/basic/binding/address.h"
+#include "bacnet/basic/object/device.h"
 #include "bacnet/basic/sys/filename.h"
 #include "bacnet/basic/services.h"
-#include "bacnet/basic/services.h"
 #include "bacnet/basic/tsm/tsm.h"
+#include "bacnet/datalink/datalink.h"
 #include "bacnet/datalink/dlenv.h"
-#include "bacnet/bacapp.h"
+#include "bacport.h"
 
 /* buffer used for receive */
 static uint8_t Rx_Buf[MAX_MPDU] = { 0 };
@@ -146,6 +126,7 @@ static void print_usage(char *filename)
 
 static void print_help(char *filename)
 {
+    printf("Send BACnet UnconfirmedPrivateTransfer message to the network.\n");
     printf("device-instance:\n"
         "BACnet Device Object Instance number that you are\n"
         "trying to communicate to.  This number will be used\n"
@@ -232,7 +213,7 @@ int main(int argc, char *argv[])
     Target_Service_Number = strtol(argv[3], NULL, 0);
     if ((!Target_Broadcast) &&
         (Target_Device_Object_Instance > BACNET_MAX_INSTANCE)) {
-        fprintf(stderr, "device-instance=%u - it must be less than %u\n",
+        fprintf(stderr, "device-instance=%u - not greater than %u\n",
             Target_Device_Object_Instance, BACNET_MAX_INSTANCE);
         return 1;
     }
@@ -317,7 +298,8 @@ int main(int argc, char *argv[])
             /* increment timer - exit if timed out */
             delta_seconds = current_seconds - last_seconds;
             elapsed_seconds += delta_seconds;
-            tsm_timer_milliseconds(((current_seconds - last_seconds) * 1000));
+            tsm_timer_milliseconds(delta_seconds * 1000);
+            datalink_maintenance_timer(delta_seconds);
         }
         if (Error_Detected) {
             break;

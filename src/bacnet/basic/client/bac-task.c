@@ -1,10 +1,9 @@
 /**
  * @file
- * @author Steve Karg
- * @date 2013
  * @brief High level BACnet Task handling
- *
- * SPDX-License-Identifier: MIT
+ * @author Steve Karg <skarg@users.sourceforge.net>
+ * @date 2022
+ * @copyright SPDX-License-Identifier: MIT
  */
 #include <stddef.h>
 #include <stdint.h>
@@ -13,11 +12,12 @@
 #include <string.h>
 #include <math.h>
 /* core library */
-#include "bacnet/apdu.h"
+/* BACnet Stack defines - first */
 #include "bacnet/bacdef.h"
+/* BACnet Stack API */
+#include "bacnet/apdu.h"
 #include "bacnet/bacdcode.h"
 #include "bacnet/bacerror.h"
-#include "bacnet/config.h"
 #include "bacnet/dcc.h"
 #include "bacnet/iam.h"
 #include "bacnet/npdu.h"

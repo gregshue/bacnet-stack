@@ -1,50 +1,33 @@
-/**************************************************************************
- *
- * Copyright (C) 2006 Steve Karg <skarg@users.sourceforge.net>
- *
- * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the
- * "Software"), to deal in the Software without restriction, including
- * without limitation the rights to use, copy, modify, merge, publish,
- * distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so, subject to
- * the following conditions:
- *
- * The above copyright notice and this permission notice shall be included
- * in all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
- * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
- * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
- * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
- * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- *********************************************************************/
+/** 
+ * @file 
+ * @brief Example application using the BACnet Stack on a Raspberry Pi 
+ * with Blinkt! LEDs.
+ * @author Steve Karg <skarg@users.sourceforge.net>
+ * @date 2023
+ * @copyright SPDX-License-Identifier: MIT
+ */
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
-#include "bacnet/config.h"
-#include "bacnet/basic/binding/address.h"
+/* BACnet Stack defines - first */
 #include "bacnet/bacdef.h"
-#include "bacnet/basic/services.h"
-#include "bacnet/basic/services.h"
-#include "bacnet/datalink/dlenv.h"
+/* BACnet Stack API */
 #include "bacnet/bacdcode.h"
 #include "bacnet/npdu.h"
 #include "bacnet/apdu.h"
 #include "bacnet/iam.h"
-#include "bacnet/basic/tsm/tsm.h"
-#include "bacnet/basic/object/device.h"
-#include "bacnet/basic/object/bacfile.h"
-#include "bacnet/datalink/datalink.h"
 #include "bacnet/dcc.h"
 #include "bacnet/getevent.h"
 #include "bacnet/lighting.h"
-#include "bacport.h"
+/* demo services */
+#include "bacnet/basic/binding/address.h"
+#include "bacnet/basic/services.h"
+#include "bacnet/basic/services.h"
+#include "bacnet/datalink/dlenv.h"
+#include "bacnet/basic/tsm/tsm.h"
+#include "bacnet/datalink/datalink.h"
 #include "bacnet/basic/sys/mstimer.h"
 #include "bacnet/basic/sys/color_rgb.h"
 #include "bacnet/basic/sys/filename.h"
@@ -53,13 +36,14 @@
 #include "bacnet/version.h"
 /* include the device object */
 #include "bacnet/basic/object/device.h"
+#include "bacnet/basic/object/bacfile.h"
 #include "bacnet/basic/object/lo.h"
 #include "bacnet/basic/object/channel.h"
 #include "bacnet/basic/object/color_object.h"
 #include "bacnet/basic/object/color_temperature.h"
+/* local includes */
+#include "bacport.h"
 #include "blinkt.h"
-
-/** @file blinkt/main.c  Example application using the BACnet Stack. */
 
 /* (Doxygen note: The next two lines pull all the following Javadoc
  *  into the ServerDemo module.) */
@@ -391,7 +375,7 @@ int main(int argc, char *argv[])
         }
     }
     if (device_id > BACNET_MAX_INSTANCE) {
-        fprintf(stderr, "device=%u - it must be less than %u\n", device_id,
+        fprintf(stderr, "device=%u - not greater than %u\n", device_id,
             BACNET_MAX_INSTANCE);
         return 1;
     }

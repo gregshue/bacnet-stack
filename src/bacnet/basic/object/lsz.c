@@ -1,32 +1,26 @@
 /**
  * @file
- * @author Steve Karg
+ * @author Steve Karg <skarg@users.sourceforge.net>
  * @date March 2024
- * @brief Example of a Life Safety Zone object type
- *
- * The Life Safety Zone object type defines a standardized object
+ * @brief A basic BACnet Life Safety Zone object type implementation.
+ * @details The Life Safety Zone object type defines a standardized object
  * whose properties represent the externally visible characteristics
  * associated with an arbitrary group of BACnet Life Safety Point
  * and Life Safety Zone objects in fire, life safety and security
  * applications. The condition of a Life Safety Zone object is
  * represented by a mode and a state.
- *
- * @copyright
- *
- * Copyright (C) 2024 Steve Karg <skarg@users.sourceforge.net>
- *
- * SPDX-License-Identifier: MIT
+ * @copyright SPDX-License-Identifier: MIT
  */
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+/* BACnet Stack defines - first */
 #include "bacnet/bacdef.h"
+/* BACnet Stack API */
 #include "bacnet/bacdcode.h"
-#include "bacnet/bacenum.h"
 #include "bacnet/bacapp.h"
-#include "bacnet/config.h" /* the custom stuff */
 #include "bacnet/rp.h"
 #include "bacnet/wp.h"
 #include "bacnet/basic/services.h"
@@ -90,32 +84,6 @@ void Life_Safety_Zone_Property_Lists(
     }
 
     return;
-}
-
-/**
- * @brief Determine if the object property is a member of this object instance
- * @param object_instance - object-instance number of the object
- * @param object_property - object-property to be checked
- * @return true if the property is a member of this object instance
- */
-static bool Property_List_Member(uint32_t object_instance, int object_property)
-{
-    bool found = false;
-    const int *pRequired = NULL;
-    const int *pOptional = NULL;
-    const int *pProprietary = NULL;
-
-    (void)object_instance;
-    Life_Safety_Zone_Property_Lists(&pRequired, &pOptional, &pProprietary);
-    found = property_list_member(pRequired, object_property);
-    if (!found) {
-        found = property_list_member(pOptional, object_property);
-    }
-    if (!found) {
-        found = property_list_member(pProprietary, object_property);
-    }
-
-    return found;
 }
 
 /**
@@ -196,7 +164,7 @@ BACNET_LIFE_SAFETY_STATE Life_Safety_Zone_Present_Value(
 /**
  * @brief For a given object instance-number, sets the present-value
  * @param  object_instance - object-instance number of the object
- * @param  value - floating point analog output relinquish-default value
+ * @param  value - present-value property value
  * @return  true if values are within range and relinquish-default value is set.
  */
 bool Life_Safety_Zone_Present_Value_Set(
@@ -237,7 +205,7 @@ bool Life_Safety_Zone_Object_Name(
             status =
                 characterstring_init_ansi(object_name, pObject->Object_Name);
         } else {
-            snprintf(name_text, sizeof(name_text), "LIFE-SAFETY-POINT-%u",
+            snprintf(name_text, sizeof(name_text), "LIFE-SAFETY-ZONE-%u",
                 object_instance);
             status = characterstring_init_ansi(object_name, name_text);
         }
@@ -550,7 +518,7 @@ static bool Life_Safety_Zone_Members_Write(BACNET_WRITE_PROPERTY_DATA *wp_data)
     uint8_t *apdu = NULL;
     BACNET_DEVICE_OBJECT_PROPERTY_REFERENCE data = { 0 };
 
-    if ((wp_data == NULL) || (wp_data->application_data == NULL)) {
+    if (wp_data == NULL) {
         return false;
     }
     /* empty the list */
@@ -832,8 +800,11 @@ bool Life_Safety_Zone_Write_Property(BACNET_WRITE_PROPERTY_DATA *wp_data)
             status = Life_Safety_Zone_Members_Write(wp_data);
             break;
         default:
-            if (Property_List_Member(
-                    wp_data->object_instance, wp_data->object_property)) {
+            if (property_lists_member(
+                Life_Safety_Zone_Properties_Required,
+                Life_Safety_Zone_Properties_Optional,
+                Life_Safety_Zone_Properties_Proprietary,
+                wp_data->object_property)) {
                 wp_data->error_class = ERROR_CLASS_PROPERTY;
                 wp_data->error_code = ERROR_CODE_WRITE_ACCESS_DENIED;
             } else {
@@ -938,5 +909,7 @@ void Life_Safety_Zone_Cleanup(void)
  */
 void Life_Safety_Zone_Init(void)
 {
-    Object_List = Keylist_Create();
+    if (!Object_List) {
+        Object_List = Keylist_Create();
+    }
 }

@@ -1,19 +1,19 @@
 /**
  * @file
+ * @brief API for basic BACnet data handling
  * @author Steve Karg <skarg@users.sourceforge.net>
  * @date 2013
- *
- * SPDX-License-Identifier: MIT
+ * @copyright SPDX-License-Identifier: MIT
  */
-#ifndef BAC_DATA_H
-#define BAC_DATA_H
+#ifndef BACNET_BASIC_CLIENT_DATA_H
+#define BACNET_BASIC_CLIENT_DATA_H
 
 #include <stdint.h>
-#include "bacnet/bacdef.h"  /* Must be before all other bacnet *.h files */
-#include "bacnet/bacenum.h"
+/* BACnet Stack defines - first */
+#include "bacnet/bacdef.h"
+/* BACnet Stack API */
 #include "bacnet/bacapp.h"
 #include "bacnet/rp.h"
-#include "bacnet/bacnet_stack_exports.h"
 
 struct bacnet_status_flags_t {
     bool in_alarm : 1;
